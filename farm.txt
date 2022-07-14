@@ -1,0 +1,345 @@
+
+DELETE farm
+
+PUT farm
+{
+  "settings": {
+    "analysis": {
+      "analyzer": {
+        "rus_analyzer": {
+          "tokenizer": "group_tokenizer",
+          "filter": [
+            "lowercase",
+            "prefix_filter"
+          ]
+        },
+        "keyboard": {
+          "tokenizer": "standard",
+          "filter": [
+            "lowercase",
+            "prefix_filter"
+          ],
+          "char_filter": [
+            "keyboard_char_filter"
+          ]
+        },
+        "translit": {
+          "tokenizer": "standard",
+          "filter": [
+            "lowercase",
+            "prefix_filter"
+          ],
+          "char_filter": [
+            "trans_char_filter"
+          ]
+        }
+      },
+      "tokenizer": {
+        "group_tokenizer": {
+          "type": "ngram",
+          "min_gram": 2,
+          "max_gram": 4,
+          "token_chars": [
+            "letter",
+            "digit"
+          ]
+        }
+      },
+      "filter": {
+        "prefix_filter": {
+          "type": "edge_ngram",
+          "min_gram": 2,
+          "max_gram": 20
+        }
+      },
+      "char_filter": {
+        "trans_char_filter": {
+          "type": "mapping",
+          "mappings": [
+            "a => а",
+            "b => б",
+            "c => ц",
+            "d => д",
+            "e => е",
+            "f => ф",
+            "g => г",
+            "h => х",
+            "i => и",
+            "k => к",
+            "l => л",
+            "m => м",
+            "n => н",
+            "o => о",
+            "p => п",
+            "r => р",
+            "s => с",
+            "t => т",
+            "u => у",
+            "v => в",
+            "y => й",
+            "z => з",
+            "A => А",
+            "B => Б",
+            "C => Ц",
+            "D => Д",
+            "E => Е",
+            "F => Ф",
+            "G => Г",
+            "H => Х",
+            "I => И",
+            "K => К",
+            "L => Л",
+            "M => М",
+            "N => Н",
+            "O => О",
+            "P => П",
+            "R => Р",
+            "S => С",
+            "T => Т",
+            "U => У",
+            "V => В",
+            "Y => Й",
+            "Z => З"
+          ]
+        },
+        "keyboard_char_filter": {
+          "type": "mapping",
+          "mappings": [
+            "a => ф",
+            "b => и",
+            "c => с",
+            "d => в",
+            "e => у",
+            "f => а",
+            "g => п",
+            "h => р",
+            "i => ш",
+            "j => о",
+            "k => л",
+            "l => д",
+            "m => ь",
+            "n => т",
+            "o => щ",
+            "p => з",
+            "r => к",
+            "s => ы",
+            "t => е",
+            "u => г",
+            "v => м",
+            "w => ц",
+            "x => ч",
+            "y => н",
+            "z => я",
+            "A => Ф",
+            "B => И",
+            "C => С",
+            "D => В",
+            "E => У",
+            "F => А",
+            "G => П",
+            "H => Р",
+            "I => Ш",
+            "J => О",
+            "K => Л",
+            "L => Д",
+            "M => Ь",
+            "N => Т",
+            "O => Щ",
+            "P => З",
+            "R => К",
+            "S => Ы",
+            "T => Е",
+            "U => Г",
+            "V => М",
+            "W => Ц",
+            "X => Ч",
+            "Y => Н",
+            "Z => Я",
+            "[ => х",
+            "] => ъ",
+            "; => ж",
+            "< => б",
+            "> => ю"
+          ]
+        }
+      }
+    },
+    "index": {
+         "max_ngram_diff": 4
+      }
+  },
+  "mappings": {
+    "properties": {
+      "word": {
+        "type": "text",
+        "analyzer": "rus_analyzer"
+      }
+    }
+  }
+}
+
+
+post /farm/_bulk
+{ "index": { "_id": 1 }}
+{"word":"Парацетамол 500мг 20 шт. таблетки"}
+{ "index": { "_id": 2 }}
+{"word":"Парацетамол 200мг 10 шт. таблетки Татхимфарм"}
+{ "index": { "_id": 3 }}
+{"word":"Парацетамол 500мг 12 шт. таблетки шипучие"}
+{ "index": { "_id": 4 }}
+{"word":"Парацетамол 24мг/мл 200г суспензия для детей Апельсин"}
+{ "index": { "_id": 5 }}
+{"word":"Римантадин 50мг 20 шт. таблетки Хфз Ао"}
+{ "index": { "_id": 6 }}
+{"word":"Римантадин 50мг 20 шт. таблетки Татхимфарм"}
+{ "index": { "_id": 7 }}
+{"word":"Римантадин 50мг 20 шт. таблетки Озон"}
+{ "index": { "_id": 8 }}
+{"word":"Нурофен 200мг 20 шт. таблетки"}
+{ "index": { "_id": 9 }}
+{"word":"Полисорб Мп 3г 10 шт. порошок пакет"}
+{ "index": { "_id": 10 }}
+{"word":"Арбидол 100мг 20 шт. капсулы"}
+
+
+get farm/_search
+{
+  "query": {
+    "bool": {
+      "should": [
+        {"match": {"word": {"query": "Парацетамол","analyzer": "keyboard"}}},
+        {"match": {"word": {"query": "Парацетамол","analyzer": "translit"}}}
+      ],
+      "minimum_should_match": 1
+    }
+  }
+}
+
+get farm/_search
+{
+  "query": {
+    "bool": {
+      "should": [
+        {"match": {"word": {"query": "Парацетамол детский","analyzer": "keyboard"}}},
+        {"match": {"word": {"query": "Парацетамол детский","analyzer": "translit"}}}
+      ],
+      "minimum_should_match": 1
+    }
+  }
+}
+
+
+get farm/_search
+{
+ "query": {
+    "bool": {
+      "should": [
+        {"match": {"word": {"query": "ПА","analyzer": "keyboard"}}},
+        {"match": {"word": {"query": "ПА","analyzer": "translit"}}}
+      ],
+      "minimum_should_match": 1
+    }
+  }
+}
+get farm/_search
+{
+  "query": {
+    "bool": {
+      "should": [
+        {"match": {"word": {"query": "ПАР","analyzer": "keyboard"}}},
+        {"match": {"word": {"query": "ПАР","analyzer": "translit"}}}
+      ],
+      "minimum_should_match": 1
+    }
+  }
+}
+
+get farm/_search
+{
+  "query": {
+    "bool": {
+      "should": [
+        {"match": {"word": {"query": "gfhfwtnf","analyzer": "keyboard"}}},
+        {"match": {"word": {"query": "gfhfwtnf","analyzer": "translit"}}}
+      ],
+      "minimum_should_match": 1
+    }
+  }
+}
+get farm/_search
+{
+  "query": {
+    "bool": {
+      "should": [
+        {"match": {"word": {"query": "paratamol","analyzer": "keyboard"}}},
+        {"match": {"word": {"query": "paratamol","analyzer": "translit"}}}
+      ],
+      "minimum_should_match": 1
+    }
+  }
+}
+
+get farm/_search
+{
+  "query": {
+    "bool": {
+      "should": [
+        {"match": {"word": {"query": "пароцемол","analyzer": "keyboard"}}},
+        {"match": {"word": {"query": "пароцемол","analyzer": "translit"}}}
+      ],
+      "minimum_should_match": 1
+    }
+  }
+}
+
+
+
+get farm/_search
+{
+  "query": {
+    "bool": {
+      "should": [
+        {"match": {"word": {"query": "ПАРОЦЕТОЛ","analyzer": "keyboard"}}},
+        {"match": {"word": {"query": "ПАРОЦЕТОЛ","analyzer": "translit"}}}
+      ],
+      "minimum_should_match": 1
+    }
+  }
+}
+get farm/_search
+{
+  "query": {
+    "bool": {
+      "should": [
+        {"match": {"word": {"query": "ритамадин","analyzer": "keyboard"}}},
+        {"match": {"word": {"query": "ритамадин","analyzer": "translit"}}}
+      ],
+      "minimum_should_match": 1
+    }
+  }
+}
+
+get farm/_search
+{
+  "query": {
+    "bool": {
+      "should": [
+        {"match": {"word": {"query": "polisorb","analyzer": "keyboard"}}},
+        {"match": {"word": {"query": "polisorb","analyzer": "translit"}}}
+      ],
+      "minimum_should_match": 1
+    }
+  }
+}
+
+get farm/_search
+{ "query": {
+    "bool": {
+      "should": [
+        {"match": {"word": {"query": "SORB","analyzer": "keyboard"}}},
+        {"match": {"word": {"query": "SORB","analyzer": "translit"}}}
+      ],
+      "minimum_should_match": 1
+    }
+  }
+}

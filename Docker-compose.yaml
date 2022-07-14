@@ -1,0 +1,16 @@
+version: "3.7"
+
+services:
+  es:
+    container_name: grpc-es
+    image: elasticsearch:8.2.3
+    environment:
+        - "discovery.type=single-node"
+        - xpack.security.enabled=false
+    ports:
+      - 9200:9200
+  kibana:
+    container_name: kibana-es
+    image: kibana:8.2.3
+    ports:
+      - 5601:5601
